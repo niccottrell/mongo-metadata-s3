@@ -1,6 +1,58 @@
 # S3 Metadata Proof-of-Concept
 
 This demo creates dummy MongoDB documents with a userId and some other payload. 
+
 The full document is stored in S3 and only certain metadata fields are persisted to MongoDB.
+
 Using the fields from the document in MongoDB is it possible to load a Document object from S3.
 The demo also shows rebuilding documents in MongoDB from S3.
+
+## Use case
+
+The problem was storing large documents (e.g. > 100KB) when we are writing millions of documents per day. 
+This makes the total data size grow quickly - leading to the need to shard early. 
+
+Furthermore, we add the requirement to store documents for several years.
+
+However, only a small subset of fields need to be queried via MongoDB, so we are exploring the possibility to store the full payload in S3.
+
+## Documents generated
+
+The demo will generate documents like:
+
+```
+{
+  "_id": { "$oid": "5afd85cc198ef4b1b7ea024e" },
+  "userId": 723,
+  "name": "MongoDB",
+  "type": "database",
+  "count": 811,
+  "versions": ["v3.2", "v3.0", "v2.6"],
+  "data": "kl8QGAFArghImN9chteLA36gaHMTgF6zDFuipLqCoCBmz8IfBA7m4qFdP69JlO3v",
+  "info": {
+    "x": 203,
+    "y": 102
+  }
+}
+```
+
+However only a subset will be stored in MongoDB like:
+
+
+```
+{
+  "_id": { "$oid": "5afd85cc198ef4b1b7ea024e" },
+  "userId": 723,
+  "name": "MongoDB",
+  "type": "database",
+  "count": 811,
+}
+```
+
+From this meta-data it is possible to load the full document from S3 at `{userId}/{_id}.json` in this case `723/5afd85cc198ef4b1b7ea024e.json` .
+
+By using the `userId` as a prefix we can generate S3 keys with randomly-distributed prefixes for improved S3 write performance.
+
+## Indexing
+
+The metadata fields (here `name`, `type`, `count`) can be indexed in MongoDB making it performant to query millions of documents, then load data from S3 only when needed.
