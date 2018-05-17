@@ -56,3 +56,9 @@ By using the `userId` as a prefix we can generate S3 keys with randomly-distribu
 ## Indexing
 
 The metadata fields (here `name`, `type`, `count`) can be indexed in MongoDB making it performant to query millions of documents, then load data from S3 only when needed.
+
+## Requirements
+
+This demo assumes that there is a local MongoDB server running and that you have valid AWS credentials setup in your environment (e.g. in `~/.aws/config`)
+
+You will need to choose a new `s3bucketName` field before compiling. 

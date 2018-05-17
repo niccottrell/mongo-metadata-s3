@@ -21,12 +21,15 @@ public class Demo {
 
     public static final String DBNAME = "s3poc";
     public static final String COLLNAME = "meta";
-    public static final String COLL_RESTORED = COLLNAME + ".restored";
 
     /**
      * The field used to build the "folder" or S3 object prefix
      */
     public static final String PREFIX_FIELD = "userId";
+
+    /**
+     * TODO: Choose your own bucket name
+     */
     public static String s3clientRegion = "eu-central-1";
     public static String s3bucketName = "nic-metadata-poc";
 
@@ -115,7 +118,6 @@ public class Demo {
     private void dropData() {
         MongoDatabase database = getDb();
         database.getCollection(COLLNAME).drop();
-        database.getCollection(COLL_RESTORED).drop();
         deleteS3Objects("");
     }
 
