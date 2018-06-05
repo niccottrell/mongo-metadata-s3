@@ -62,3 +62,11 @@ The metadata fields (here `name`, `type`, `count`) can be indexed in MongoDB mak
 This demo assumes that there is a local MongoDB server running and that you have valid AWS credentials setup in your environment (e.g. in `~/.aws/config`)
 
 You will need to choose a new `s3bucketName` field before compiling. 
+
+# Running
+
+Build with `mvn package`
+
+Configure your AWS creditials for the current user.
+
+Then run with `java -jar target/mongos3-1.0-SNAPSHOT-jar-with-dependencies.jar -r <S3REGION> -b <S3BUCKET>`
