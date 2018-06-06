@@ -37,7 +37,7 @@ public class Demo {
      */
     public static String[] metaFields = new String[]{"name", "type", "count"};
 
-    private static final MongoClient mongoClient = MongoClients.create();
+    private final MongoClient mongoClient;
 
     private final Settings settings;
     private final Results results;
@@ -45,14 +45,24 @@ public class Demo {
     public Demo(Settings settings) {
         this.settings = settings;
         this.results = new Results();
+        this.mongoClient = MongoClients.create(settings.mongoUri);
     }
 
     public static void main(String[] args) throws Exception {
         Settings settings = new Settings(args);
         if (settings.helpOnly) return;
+        System.out.println("Connection String: " + settings.mongoUri);
         Demo demo = new Demo(settings);
         // cleanup S3 and MongoDB
-        if (settings.drop) demo.dropData();
+        if (settings.drop) {
+            System.out.println("Dropping S3 and MongoDB data...");
+            demo.dropData();
+        }
+        // output example document
+        Document sampleDoc = demo.createDoc();
+        String sampleJson = sampleDoc.toJson();
+        System.out.println("Sample document: " + sampleJson);
+        System.out.format("Document size: %,d bytes\n",  sampleJson.getBytes().length);
         // write some Documents in S3 and MongoDB
         // demo.populateMongo(false);
         // prepare results oobject
@@ -298,6 +308,7 @@ public class Demo {
                 PutObjectRequest request = prepareS3Request(doc);
                 tm.upload(request);
                 count++;
+                // TODO: How do we confirm that the request succeeded? Test again later?
             } catch (AmazonServiceException e) {
                 // The call was transmitted successfully, but Amazon S3 couldn't process
                 // it, so it returned an error response.

@@ -10,7 +10,7 @@ public class Settings {
     protected final String s3Bucket;
     protected final String s3Region;
     protected final String s3Prefix;
-    protected final int port;
+    protected final String mongoUri;
     protected final String databaseName;
     protected final String collectionName;
     protected final boolean drop;
@@ -32,9 +32,9 @@ public class Settings {
         cliopt.addOption("b", "s3bucket", true, "S3 bucket name");
         cliopt.addOption("r", "s3region", true, "S3 region code");
         cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `/first_test` or ``)");
-        cliopt.addOption(null, "port", true, "Mongo server port (optional)");
-        cliopt.addOption("n", "namespace", true, "Mongo Namespace (default: `test.s3mongo`)");
-        cliopt.addOption("d", false, "Drop collection at start of run");
+        cliopt.addOption("c", "uri", true, "MongoDB connection details (default 'mongodb://localhost:27017' )");
+        cliopt.addOption("n", "namespace", true, "MongoDB namespace (default: `test.s3mongo`)");
+        cliopt.addOption("d", "cleanup", false, "Drop collection and S3 data at start of run");
         cliopt.addOption("f", "fieldCount", true, "Number of fields (default: 7)");
         cliopt.addOption("t", false, "Test rebuilding of data from S3");
         cliopt.addOption(null, "skipGzip", false, "Store in S3 as JSON (not .json.gz)");
@@ -61,7 +61,7 @@ public class Settings {
         skipGzip = cmd.hasOption("skipGzip");
         skipPrefixHash = cmd.hasOption("skipPrefixHash");
 
-        port = Integer.parseInt(cmd.getOptionValue("port", "27017"));
+        mongoUri = cmd.getOptionValue("c", "mongodb://localhost:27017");
 
         String ns = cmd.getOptionValue("n", "test.s3mongo");
         String[] parts = ns.split("\\.");
@@ -91,7 +91,7 @@ public class Settings {
         return s3Prefix;
     }
 
-    public int getPort() {
-        return port;
+    public String getMongoUri() {
+        return mongoUri;
     }
 }

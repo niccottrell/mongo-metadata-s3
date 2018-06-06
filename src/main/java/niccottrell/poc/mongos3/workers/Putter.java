@@ -17,7 +17,7 @@ public class Putter extends Worker {
 
     public Putter(Demo demo) {
         super(demo);
-        lastRun = new Date(0); // start at the beginning of time
+        lastRun = new Date(); // start at the beginning of tests
     }
 
     @Override
