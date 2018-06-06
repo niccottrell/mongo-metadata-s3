@@ -70,3 +70,20 @@ Build with `mvn package`
 Configure your AWS creditials for the current user.
 
 Then run with `java -jar target/mongos3-1.0-SNAPSHOT-jar-with-dependencies.jar -r <S3REGION> -b <S3BUCKET>`
+
+## Usage
+
+```
+usage: 
+ -b,--s3bucket <arg>     S3 bucket name
+ -d                      Drop collection at start of run
+ -f,--fieldCount <arg>   Number of fields (default: 7)
+ -h,--help               Print help only
+ -n,--namespace <arg>    Mongo Namespace (default: `test.s3mongo`)
+    --port <arg>         Mongo server port (optional)
+ -r,--s3region <arg>     S3 region code
+    --s3prefix <arg>     S3 prefix path (optional, e.g. `/first_test` or ``)
+    --skipGzip           Store in S3 as JSON (not .json.gz)
+    --skipPrefixHash     Create S3 path based on raw field value
+ -t                      Test rebuilding of data from S3
+```

@@ -3,7 +3,7 @@ package niccottrell.poc.mongos3;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.zip.GZIPOutputStream;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
@@ -12,6 +12,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.amazonaws.util.IOUtils;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -48,6 +49,7 @@ public class Demo {
 
     public static void main(String[] args) throws Exception {
         Settings settings = new Settings(args);
+        if (settings.helpOnly) return;
         Demo demo = new Demo(settings);
         // cleanup S3 and MongoDB
         if (settings.drop) demo.dropData();
@@ -306,27 +308,52 @@ public class Demo {
 
     }
 
-    private PutObjectRequest prepareS3Request(Document doc) {
+    protected PutObjectRequest prepareS3Request(Document doc) {
         String fileObjKeyName = getS3Key(doc);
 
         // Convert Document to JSON string to input stream
         String json = doc.toJson();
-        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
-        InputStream stream = new ByteArrayInputStream(bytes);
 
         // Upload a file as a new object with ContentType and title specified.
-
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("application/json");  // TODO: save as tar.gz
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+        if (!settings.skipGzip) {
+            metadata.setContentEncoding("gzip");
+            fileObjKeyName += ".gz";
+            ByteArrayInputStream input = new ByteArrayInputStream(bytes);
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                OutputStream output = new GZIPOutputStream(baos);
+                IOUtils.copy(input, output);
+                //close resources
+                output.close();
+                bytes = baos.toByteArray();
+
+            } catch (IOException e) {
+                throw new RuntimeException("Problem compressing doc: " + fileObjKeyName);
+            }
+        }
+
+        metadata.setContentType("application/json");
         metadata.setContentLength(bytes.length);
         metadata.addUserMetadata("x-amz-meta-title", fileObjKeyName);
-
+        InputStream stream = new ByteArrayInputStream(bytes);
         return new PutObjectRequest(settings.s3Bucket, fileObjKeyName, stream, metadata);
     }
 
-    private String getS3Key(Document doc) {
-        return settings.s3Prefix + doc.get(PREFIX_FIELD) + "/" +
-                doc.getObjectId("_id").toHexString() + ".json";
+    protected String getS3Key(Document doc) {
+        Object prefixValue = doc.get(PREFIX_FIELD);
+        String prefix;
+        if (settings.skipPrefixHash) {
+            prefix = prefixValue.toString();
+        } else {
+            // See https://aws.amazon.com/blogs/aws/amazon-s3-performance-tips-tricks-seattle-hiring-event/
+            int hashCode = prefixValue.hashCode();
+            prefix = Integer.toHexString(hashCode);
+        }
+        return settings.s3Prefix + prefix + "/" +
+                doc.get("_id").toString() + ".json";
     }
 
     private AmazonS3 s3client;
