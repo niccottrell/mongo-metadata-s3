@@ -59,6 +59,8 @@ public class Settings {
         s3Prefix = cmd.getOptionValue("s3prefix", "");
         if (isNotBlank(s3Prefix) && !s3Prefix.endsWith("/"))
             throw new RuntimeException("S3 folder should be like `example/`");
+        if (isNotBlank(s3Prefix))
+            System.out.println("Using S3 prefix: " + s3Prefix);
 
         s3Threads = Integer.parseInt(cmd.getOptionValue("s3threads", "100"));
         System.out.println("S3 putter thread pool: " + s3Threads);

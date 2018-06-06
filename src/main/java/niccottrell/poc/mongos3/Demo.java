@@ -142,7 +142,7 @@ public class Demo {
     private void dropData() {
         MongoDatabase database = getDb();
         database.getCollection(settings.collectionName).drop();
-        deleteS3Objects("");
+        deleteS3Objects(settings.s3Prefix);
     }
 
     /**
@@ -292,7 +292,7 @@ public class Demo {
         } catch (AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process
             // it, so it returned an error response.
-            throw new RuntimeException("Error putting document with _id " + doc.get("_id"));
+            throw new RuntimeException("Error putting document with _id " + doc.get("_id"), e);
         }
     }
 
@@ -319,7 +319,7 @@ public class Demo {
                 bytes = baos.toByteArray();
 
             } catch (IOException e) {
-                throw new RuntimeException("Problem compressing doc: " + fileObjKeyName);
+                throw new RuntimeException("Problem compressing doc: " + fileObjKeyName, e);
             }
         }
 
