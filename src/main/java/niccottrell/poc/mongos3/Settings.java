@@ -10,6 +10,7 @@ public class Settings {
     protected final String s3Bucket;
     protected final String s3Region;
     protected final String s3Prefix;
+    protected final int s3Threads;
     protected final String mongoUri;
     protected final String databaseName;
     protected final String collectionName;
@@ -32,6 +33,7 @@ public class Settings {
         cliopt.addOption("b", "s3bucket", true, "S3 bucket name");
         cliopt.addOption("r", "s3region", true, "S3 region code");
         cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `/first_test` or ``)");
+        cliopt.addOption(null, "s3threads", true, "The max number of parallel S3 putObject threads, default 100");
         cliopt.addOption("c", "uri", true, "MongoDB connection details (default 'mongodb://localhost:27017' )");
         cliopt.addOption("n", "namespace", true, "MongoDB namespace (default: `test.s3mongo`)");
         cliopt.addOption("d", "cleanup", false, "Drop collection and S3 data at start of run");
@@ -58,10 +60,14 @@ public class Settings {
         if (isNotBlank(s3Prefix) && !s3Prefix.endsWith("/"))
             throw new RuntimeException("S3 folder should be like `example/`");
 
+        s3Threads = Integer.parseInt(cmd.getOptionValue("s3threads", "100"));
+        System.out.println("S3 putter thread pool: " + s3Threads);
+
         skipGzip = cmd.hasOption("skipGzip");
         skipPrefixHash = cmd.hasOption("skipPrefixHash");
 
         mongoUri = cmd.getOptionValue("c", "mongodb://localhost:27017");
+        System.out.println("Connection string: " + mongoUri);
 
         String ns = cmd.getOptionValue("n", "test.s3mongo");
         String[] parts = ns.split("\\.");

@@ -3,6 +3,8 @@ package niccottrell.poc.mongos3;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
 import com.amazonaws.AmazonServiceException;
@@ -10,8 +12,6 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.util.IOUtils;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
@@ -39,6 +39,8 @@ public class Demo {
 
     private final MongoClient mongoClient;
 
+    public final ExecutorService s3Pool;
+
     private final Settings settings;
     private final Results results;
 
@@ -46,12 +48,12 @@ public class Demo {
         this.settings = settings;
         this.results = new Results();
         this.mongoClient = MongoClients.create(settings.mongoUri);
+        this.s3Pool = Executors.newFixedThreadPool(settings.s3Threads);
     }
 
     public static void main(String[] args) throws Exception {
         Settings settings = new Settings(args);
         if (settings.helpOnly) return;
-        System.out.println("Connection String: " + settings.mongoUri);
         Demo demo = new Demo(settings);
         // cleanup S3 and MongoDB
         if (settings.drop) {
@@ -62,10 +64,10 @@ public class Demo {
         Document sampleDoc = demo.createDoc();
         String sampleJson = sampleDoc.toJson();
         System.out.println("Sample document: " + sampleJson);
-        System.out.format("Document size: %,d bytes\n",  sampleJson.getBytes().length);
+        System.out.format("Document size: %,d bytes\n", sampleJson.getBytes().length);
         // write some Documents in S3 and MongoDB
         // demo.populateMongo(false);
-        // prepare results oobject
+        // prepare results object
         Runner runner = new Runner(demo);
         runner.runTest();
         // if requested, wipe MongoDB collection and rebuild from S3
@@ -282,41 +284,16 @@ public class Demo {
      * Put a single document to S3
      */
     public void saveS3(Document doc) {
-
         AmazonS3 s3Client = getS3Client();
         try {
             PutObjectRequest request = prepareS3Request(doc);
             s3Client.putObject(request);
+            // TODO: How do we confirm that the request succeeded? Test again later?
         } catch (AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process
             // it, so it returned an error response.
-            e.printStackTrace();
+            throw new RuntimeException("Error putting document with _id " + doc.get("_id"));
         }
-    }
-
-    /**
-     * Put a multiple document to S3 in parallel
-     */
-    public int saveS3(Iterable<Document> docs) {
-
-        int count = 0;
-
-        AmazonS3 s3Client = getS3Client();
-        TransferManager tm = TransferManagerBuilder.standard().withS3Client(s3Client).build();
-        for (Document doc : docs) {
-            try {
-                PutObjectRequest request = prepareS3Request(doc);
-                tm.upload(request);
-                count++;
-                // TODO: How do we confirm that the request succeeded? Test again later?
-            } catch (AmazonServiceException e) {
-                // The call was transmitted successfully, but Amazon S3 couldn't process
-                // it, so it returned an error response.
-                e.printStackTrace();
-            }
-        }
-        return count;
-
     }
 
     protected PutObjectRequest prepareS3Request(Document doc) {

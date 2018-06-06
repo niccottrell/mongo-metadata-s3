@@ -16,10 +16,8 @@ public class Archiver extends Worker {
      */
     long delay = 120;
 
-    private long sleepMs = 1000;
-
     public Archiver(Demo demo) {
-        super(demo);
+        super(demo, 1000);
     }
 
     @Override
@@ -34,11 +32,7 @@ public class Archiver extends Worker {
                 count++;
             }
             incOps(Results.Op.ARCHIVES, count);
-            try {
-                Thread.sleep(sleepMs);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            sleep();
         }
     }
 

@@ -7,10 +7,11 @@ import niccottrell.poc.mongos3.Results;
 public class Populator extends Worker {
 
     int threadIdx;
+
     private int batchSize = 50;
 
     public Populator(Demo demo, int threadIdx) {
-        super(demo);
+        super(demo, 0);
         this.threadIdx = threadIdx;
     }
 
