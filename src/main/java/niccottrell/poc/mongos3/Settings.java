@@ -9,6 +9,7 @@ public class Settings {
 
     protected final String s3Bucket;
     protected final String s3Region;
+    protected final String s3Profile;
     protected final String s3Prefix;
     protected final int s3Threads;
     protected final String mongoUri;
@@ -32,6 +33,7 @@ public class Settings {
         cliopt.addOption("h", "help", false, "Print help only");
         cliopt.addOption("b", "s3bucket", true, "S3 bucket name");
         cliopt.addOption("r", "s3region", true, "S3 region code");
+        cliopt.addOption("p", "s3profile", true, "S3 profile to use");
         cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `/first_test` or ``)");
         cliopt.addOption(null, "s3threads", true, "The max number of parallel S3 putObject threads, default 100");
         cliopt.addOption("c", "uri", true, "MongoDB connection details (default 'mongodb://localhost:27017' )");
@@ -55,6 +57,9 @@ public class Settings {
 
         s3Region = cmd.getOptionValue("r");
         if (isBlank(s3Region)) throw new RuntimeException("No S3 region provided");
+
+        s3Profile = cmd.getOptionValue("s3profile", null);
+        if (s3Profile != null) System.out.println("Using S3 profile: " + s3Profile);
 
         s3Prefix = cmd.getOptionValue("s3prefix", "");
         if (isNotBlank(s3Prefix) && !s3Prefix.endsWith("/"))

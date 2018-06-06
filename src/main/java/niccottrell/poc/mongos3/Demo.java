@@ -285,14 +285,14 @@ public class Demo {
      */
     public void saveS3(Document doc) {
         AmazonS3 s3Client = getS3Client();
+        PutObjectRequest request = prepareS3Request(doc);
         try {
-            PutObjectRequest request = prepareS3Request(doc);
             s3Client.putObject(request);
             // TODO: How do we confirm that the request succeeded? Test again later?
         } catch (AmazonServiceException e) {
             // The call was transmitted successfully, but Amazon S3 couldn't process
             // it, so it returned an error response.
-            throw new RuntimeException("Error putting document with _id " + doc.get("_id"), e);
+            throw new RuntimeException("Error putting document: " + request.getKey(), e);
         }
     }
 
@@ -350,7 +350,7 @@ public class Demo {
         if (s3client == null) {
             s3client = AmazonS3ClientBuilder.standard()
                     .withRegion(settings.s3Region)
-                    .withCredentials(new ProfileCredentialsProvider())
+                    .withCredentials(new ProfileCredentialsProvider(settings.s3Profile))
                     .build();
         }
         return s3client;
