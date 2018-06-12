@@ -18,12 +18,12 @@ public class Settings {
     protected final boolean drop;
     protected final boolean helpOnly;
     public int fieldCount;
-    public boolean testRebuild = false;
+    public boolean testRebuild;
     public int numThreads = 4;
     public long reportTime = 10; // seconds between reports
     public long duration = 300; // seconds to run the test
-    public boolean skipGzip = false; // if true, save to S3 as raw JSON
-    public boolean skipPrefixHash = false; // if true, do simple toString() on prefix field value
+    public boolean skipGzip; // if true, save to S3 as raw JSON
+    public boolean skipPrefixHash; // if true, do simple toString() on prefix field value
 
     public Settings(String[] args) throws ParseException {
 
@@ -59,19 +59,22 @@ public class Settings {
         if (isBlank(s3Region)) throw new RuntimeException("No S3 region provided");
 
         s3Profile = cmd.getOptionValue("s3profile", null);
-        if (s3Profile != null) System.out.println("Using S3 profile: " + s3Profile);
+        if (s3Profile != null) System.out.println("S3 profile: " + s3Profile);
 
         s3Prefix = cmd.getOptionValue("s3prefix", "");
         if (isNotBlank(s3Prefix) && !s3Prefix.endsWith("/"))
             throw new RuntimeException("S3 folder should be like `example/`");
         if (isNotBlank(s3Prefix))
-            System.out.println("Using S3 prefix: " + s3Prefix);
+            System.out.println("S3 prefix: " + s3Prefix);
 
         s3Threads = Integer.parseInt(cmd.getOptionValue("s3threads", "100"));
         System.out.println("S3 putter thread pool: " + s3Threads);
 
         skipGzip = cmd.hasOption("skipGzip");
+        if (skipGzip) System.out.println("Skipping GZIP before put");
+
         skipPrefixHash = cmd.hasOption("skipPrefixHash");
+        if (skipPrefixHash) System.out.println("Skipping hash of prefix (using raw value)");
 
         mongoUri = cmd.getOptionValue("c", "mongodb://localhost:27017");
         System.out.println("Connection string: " + mongoUri);
