@@ -75,15 +75,17 @@ Then run with `java -jar target/mongos3-1.0-SNAPSHOT-jar-with-dependencies.jar -
 
 ```
 usage: 
- -b,--s3bucket <arg>     S3 bucket name
- -c,--uri <arg>          MongoDB connection details (default 'mongodb://localhost:27017' )
- -d,--cleanup            Drop collection and S3 data at start of run
- -f,--fieldCount <arg>   Number of fields (default: 7)
- -h,--help               Print help only
- -n,--namespace <arg>    MongoDB namespace (default: `test.s3mongo`)
- -r,--s3region <arg>     S3 region code
-    --s3prefix <arg>     S3 prefix path (optional, e.g. `/first_test` or ``)
-    --skipGzip           Store in S3 as JSON (not .json.gz)
-    --skipPrefixHash     Create S3 path based on raw field value
- -t                      Test rebuilding of data from S3
+  -b,--s3bucket <arg>     S3 bucket name
+  -c,--uri <arg>          MongoDB connection details (default 'mongodb://localhost:27017' )
+  -d,--cleanup            Drop collection and S3 data at start of run
+  -f,--fieldCount <arg>   Number of fields (default: 7)
+  -h,--help               Print help only
+  -n,--namespace <arg>    MongoDB namespace (default: `test.s3mongo`)
+  -p,--s3profile <arg>    S3 profile to use
+  -r,--s3region <arg>     S3 region code
+     --s3prefix <arg>     S3 prefix path (optional, e.g. `first_test/` or ``)
+     --s3threads <arg>    The max number of parallel S3 putObject threads, default 100
+     --skipGzip           Store in S3 as JSON (not .json.gz)
+     --skipPrefixHash     Create S3 path based on raw field value
+  -t                      Test rebuilding of data from S3
 ```
