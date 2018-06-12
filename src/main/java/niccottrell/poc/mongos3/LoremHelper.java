@@ -38,18 +38,16 @@ public class LoremHelper {
     private String moreWords(int length) {
 
         if (loremText == null) {
-            loremText = loremIpsum.getWords(1000).split("\\s+"); // split on spaces
+            loremText = loremIpsum.getWords(1000).toLowerCase().split("\\s+"); // split on spaces
         }
 
-        Double d = rng.nextDouble();
-
         // start somewhere inside the buffer
-        int start = (int) Math.abs(Math.floor(d * (loremText.length - length)));
+        int start = rng.nextInt(loremText.length - length);
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(length * 8);
         for (int i = 0; i < length; i++) {
             sb.append(loremText[start + i]);
-            if (i < length) sb.append(" ");
+            if (i < length) sb.append(' ');
         }
 
         return sb.toString();

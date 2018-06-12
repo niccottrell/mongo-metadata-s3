@@ -269,12 +269,12 @@ public class Demo {
                 .append("type", "database")
                 .append("count", (int) (Math.random() * 1000f))
                 .append("versions", Arrays.asList("v3.2", "v3.0", "v2.6"))
-                .append("data", LoremHelper.getWords(32))
+                .append("data", LoremHelper.getWords(64))
                 .append("info", new Document("x", 203).append("y", 102))
                 .append(ARCHIVED, false); // if false, full document (otherwise only metadata) in MongoDB)
         if (settings.fieldCount > 8) {
             for (int i = 7; i < settings.fieldCount; i++) {
-                doc.append("fld" + i, LoremHelper.getWords(12));
+                doc.append("fld" + i, LoremHelper.getWords(32));
             }
         }
         return doc;
