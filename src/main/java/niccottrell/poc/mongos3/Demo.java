@@ -41,7 +41,7 @@ public class Demo {
 
     public final ExecutorService s3Pool;
 
-    private final Settings settings;
+    protected final Settings settings;
     private final Results results;
 
     public Demo(Settings settings) {
@@ -269,12 +269,12 @@ public class Demo {
                 .append("type", "database")
                 .append("count", (int) (Math.random() * 1000f))
                 .append("versions", Arrays.asList("v3.2", "v3.0", "v2.6"))
-                .append("data", RandomStringUtils.randomAlphanumeric(64))
+                .append("data", LoremHelper.getWords(32))
                 .append("info", new Document("x", 203).append("y", 102))
                 .append(ARCHIVED, false); // if false, full document (otherwise only metadata) in MongoDB)
         if (settings.fieldCount > 8) {
             for (int i = 7; i < settings.fieldCount; i++) {
-                doc.append("fld" + i, RandomStringUtils.randomAlphanumeric(16));
+                doc.append("fld" + i, LoremHelper.getWords(12));
             }
         }
         return doc;
@@ -326,6 +326,7 @@ public class Demo {
         metadata.setContentType("application/json");
         metadata.setContentLength(bytes.length);
         metadata.addUserMetadata("x-amz-meta-title", fileObjKeyName);
+        metadata.addUserMetadata("_id", doc.get("_id").toString());
         InputStream stream = new ByteArrayInputStream(bytes);
         return new PutObjectRequest(settings.s3Bucket, fileObjKeyName, stream, metadata);
     }
@@ -346,7 +347,7 @@ public class Demo {
 
     private AmazonS3 s3client;
 
-    private AmazonS3 getS3Client() {
+    protected AmazonS3 getS3Client() {
         if (s3client == null) {
             s3client = AmazonS3ClientBuilder.standard()
                     .withRegion(settings.s3Region)
