@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -353,8 +355,12 @@ public class Demo {
         if (s3client == null) {
             AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
                     .withRegion(settings.s3Region);
-            if (isNotBlank(settings.s3Profile))
+            if (isNotBlank(settings.s3Profile)) {
+                System.out.println("Using AWS profile=" + settings.s3Profile);
                 builder.withCredentials(new ProfileCredentialsProvider(settings.s3Profile));
+            }
+            if (builder.getCredentials() != null && builder.getCredentials().getCredentials() != null)
+                System.out.println("AWS access key=" + builder.getCredentials().getCredentials().getAWSAccessKeyId());
             s3client = builder.build();
         }
         return s3client;
