@@ -20,6 +20,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class Demo {
 
     /**
@@ -349,10 +351,11 @@ public class Demo {
 
     protected AmazonS3 getS3Client() {
         if (s3client == null) {
-            s3client = AmazonS3ClientBuilder.standard()
-                    .withRegion(settings.s3Region)
-                    .withCredentials(new ProfileCredentialsProvider(settings.s3Profile))
-                    .build();
+            AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
+                    .withRegion(settings.s3Region);
+            if (isNotBlank(settings.s3Profile))
+                builder.withCredentials(new ProfileCredentialsProvider(settings.s3Profile));
+            s3client = builder.build();
         }
         return s3client;
     }

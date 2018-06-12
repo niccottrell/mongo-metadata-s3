@@ -34,7 +34,7 @@ public class Settings {
         cliopt.addOption("b", "s3bucket", true, "S3 bucket name");
         cliopt.addOption("r", "s3region", true, "S3 region code");
         cliopt.addOption("p", "s3profile", true, "S3 profile to use");
-        cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `/first_test` or ``)");
+        cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `first_test/` or ``)");
         cliopt.addOption(null, "s3threads", true, "The max number of parallel S3 putObject threads, default 100");
         cliopt.addOption("c", "uri", true, "MongoDB connection details (default 'mongodb://localhost:27017' )");
         cliopt.addOption("n", "namespace", true, "MongoDB namespace (default: `test.s3mongo`)");
