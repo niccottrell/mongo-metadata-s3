@@ -17,7 +17,7 @@ import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
-import org.apache.commons.lang3.RandomStringUtils;
+import com.mongodb.client.model.InsertManyOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -211,8 +211,8 @@ public class Demo {
             Document doc = createDoc();
             batch.add(metaOnly ? createMeta(doc) : doc);
         }
-        // insert in batch for performance
-        collection.insertMany(batch);
+        // insert in batch for performance (unordered for improved performance)
+        collection.insertMany(batch, new InsertManyOptions().ordered(false));
     }
 
     /**
