@@ -357,7 +357,7 @@ public class Demo {
             // this should already read proxy settings provided with -Dhttp.proxyHost -Dhttp.proxyPort
             ClientConfiguration config = new ClientConfiguration();
             if (isNotBlank(config.getProxyHost()))
-                System.out.println(String.format("Proxy detected as %s:%s",
+                System.out.println(String.format("Proxy for S3 detected as %s:%s",
                         config.getProxyHost(), config.getProxyPort()));
             AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
                     .withRegion(settings.s3Region)

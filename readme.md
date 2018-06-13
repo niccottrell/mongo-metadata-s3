@@ -89,3 +89,11 @@ usage:
      --skipPrefixHash     Create S3 path based on raw field value
   -t                      Test rebuilding of data from S3
 ```
+
+### Advanced
+
+If you need to use a proxy for S3 requests, specify to the JVM like so:
+
+`java -Dhttps.proxyHost=<PROXYIP> -Dhttps.proxyPort=<PROXYPORT> -jar ...`
+
+Note: Use `https.` not `http.` since S3 uses https by default.
