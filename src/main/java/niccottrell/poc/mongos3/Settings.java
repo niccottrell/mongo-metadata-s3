@@ -1,6 +1,7 @@
 package niccottrell.poc.mongos3;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.StringUtils;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,11 +62,12 @@ public class Settings {
         s3Profile = cmd.getOptionValue("s3profile", null);
         if (s3Profile != null) System.out.println("S3 profile: " + s3Profile);
 
-        s3Prefix = cmd.getOptionValue("s3prefix", "");
-        if (isNotBlank(s3Prefix) && !s3Prefix.endsWith("/"))
-            throw new RuntimeException("S3 folder should be like `example/`");
-        if (isNotBlank(s3Prefix))
+        s3Prefix = StringUtils.trim(cmd.getOptionValue("s3prefix", ""));
+        if (isNotBlank(s3Prefix)) {
+            if (!s3Prefix.endsWith("/") || s3Prefix.startsWith("/") || s3Profile.contains(" "))
+                throw new RuntimeException("S3 folder should be like `example/`, was: " + s3Prefix);
             System.out.println("S3 prefix: " + s3Prefix);
+        }
 
         s3Threads = Integer.parseInt(cmd.getOptionValue("s3threads", "100"));
         System.out.println("S3 putter thread pool: " + s3Threads);
