@@ -2,6 +2,8 @@ package niccottrell.poc.mongos3;
 
 import de.svenjacobs.loremipsum.LoremIpsum;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class LoremHelper {
@@ -19,7 +21,9 @@ public class LoremHelper {
     /**
      * Each thread has its own buffer of words
      */
-    private String[] loremText = null;
+    private String loremText;
+
+    private List<Integer> breakPoints = new ArrayList<>();
 
     private Random rng = new Random();
 
@@ -38,20 +42,22 @@ public class LoremHelper {
     private String moreWords(int length) {
 
         if (loremText == null) {
-            loremText = loremIpsum.getWords(1000).toLowerCase().split("\\s+"); // split on spaces
+            // generate new text
+            loremText = loremIpsum.getWords(1000).toLowerCase();
+            for (int i = 0; i < loremText.length(); i++) {
+                char ch = loremText.charAt(i);
+                if (ch == ' ') {
+                    breakPoints.add(i);
+                }
+            }
         }
 
         // start somewhere inside the buffer
-        int start = rng.nextInt(loremText.length - length);
+        int startIdx = rng.nextInt(breakPoints.size() - length);
+        int endIdx = startIdx + length;
 
-        StringBuilder sb = new StringBuilder(length * 8);
-        for (int i = 0; i < length; i++) {
-            sb.append(loremText[start + i]);
-            if (i < length) sb.append(' ');
-        }
-
-        return sb.toString();
+        // return the substring without allocating a new char[]
+        return loremText.substring(breakPoints.get(startIdx) + 1, breakPoints.get(endIdx));
     }
-
 
 }
