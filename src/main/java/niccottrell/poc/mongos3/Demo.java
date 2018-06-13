@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.zip.GZIPOutputStream;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
@@ -353,8 +354,14 @@ public class Demo {
 
     protected AmazonS3 getS3Client() {
         if (s3client == null) {
+            // this should already read proxy settings provided with -Dhttp.proxyHost -Dhttp.proxyPort
+            ClientConfiguration config = new ClientConfiguration();
+            if (isNotBlank(config.getProxyHost()))
+                System.out.println(String.format("Proxy detected as %s:%s",
+                        config.getProxyHost(), config.getProxyPort()));
             AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
-                    .withRegion(settings.s3Region);
+                    .withRegion(settings.s3Region)
+                    .withClientConfiguration(config);
             if (isNotBlank(settings.s3Profile)) {
                 System.out.println("Using AWS profile=" + settings.s3Profile);
                 builder.withCredentials(new ProfileCredentialsProvider(settings.s3Profile));
