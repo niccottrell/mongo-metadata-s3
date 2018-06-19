@@ -30,6 +30,7 @@ public class Runner {
         ExecutorService testexec = Executors
                 .newFixedThreadPool(demo.getSettings().numThreads + 2);
 
+        System.out.println(String.format("Launching %d populator threads", demo.getSettings().numThreads));
         // Build populator threads
         for (int i = 0; i < demo.getSettings().numThreads; i++) {
             testexec.execute(new Populator(demo, i));

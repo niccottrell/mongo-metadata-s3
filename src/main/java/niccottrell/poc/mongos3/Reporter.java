@@ -22,14 +22,15 @@ public class Reporter implements Runnable {
     public void run() {
 
         Long insertsDone = results.getOps().get(Results.Op.INSERTS);
+        Long putsDone = results.getOps().get(Results.Op.PUTS);
 
         if (results.getSecondsElapsed() < demo.getSettings().reportTime)
             return;
 
         Date now = new Date();
 
-        System.out.format("After %d seconds (%s), %,d new records inserted - collection has %,d in total \n",
-                results.getSecondsElapsed(), DF_TIME.format(now), insertsDone, results.initialCount + insertsDone);
+        System.out.format("After %d seconds (%s), %,d new documents inserted, %,d files put in S3  \n",
+                results.getSecondsElapsed(), DF_TIME.format(now), insertsDone, putsDone);
 
         HashMap<Results.Op, Long> opsInterval = results.getOpsPerSecondLastInterval();
         System.out.format("%,d inserts,\n\t%,d S3 puts,\n\t%,d archived per second since last report\n",

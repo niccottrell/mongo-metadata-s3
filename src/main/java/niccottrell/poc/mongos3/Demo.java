@@ -352,8 +352,9 @@ public class Demo {
 
     private AmazonS3 s3client;
 
-    protected AmazonS3 getS3Client() {
+    protected synchronized AmazonS3 getS3Client() {
         if (s3client == null) {
+            System.out.println("Building S3 client");
             // this should already read proxy settings provided with -Dhttp.proxyHost -Dhttp.proxyPort
             ClientConfiguration config = new ClientConfiguration();
             if (isNotBlank(config.getProxyHost()))
