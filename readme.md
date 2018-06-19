@@ -65,7 +65,7 @@ You will need to choose a new `s3bucketName` field before compiling.
 
 # Running
 
-Build with `mvn package`
+Build with `mvn package -DskipTests`
 
 Configure your AWS creditials for the current user.
 
@@ -75,6 +75,7 @@ Then run with `java -jar target/mongos3-1.0-SNAPSHOT-jar-with-dependencies.jar -
 
 ```
 usage: 
+     --awsRoleArn <arg>   AWS role to assume (optional, e.g. `arn:aws:iam::1234567890:role/TeamABCMember`)
   -b,--s3bucket <arg>     S3 bucket name
   -c,--uri <arg>          MongoDB connection details (default 'mongodb://localhost:27017' )
   -d,--cleanup            Drop collection and S3 data at start of run

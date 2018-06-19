@@ -10,11 +10,16 @@ import java.util.zip.GZIPOutputStream;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
+import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
+import com.amazonaws.services.securitytoken.model.Credentials;
 import com.amazonaws.util.IOUtils;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
@@ -360,9 +365,27 @@ public class Demo {
             if (isNotBlank(config.getProxyHost()))
                 System.out.println(String.format("Proxy for S3 detected as %s:%s",
                         config.getProxyHost(), config.getProxyPort()));
+            // Start client builder
             AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
                     .withRegion(settings.s3Region)
                     .withClientConfiguration(config);
+            if (settings.awsRoleArn != null) {
+                AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClientBuilder.standard()
+                        .withCredentials(new ProfileCredentialsProvider())
+                        .withRegion(settings.s3Region)
+                        .build();
+                // Assume the role
+                AssumeRoleRequest roleRequest = new AssumeRoleRequest().withRoleArn(settings.awsRoleArn);
+                AssumeRoleResult assumeResult = stsClient.assumeRole(roleRequest);
+                // Get credentials
+                Credentials creds = assumeResult.getCredentials();
+                BasicSessionCredentials credentials = new BasicSessionCredentials(
+                        creds.getAccessKeyId(),
+                        creds.getSecretAccessKey(),
+                        creds.getSessionToken());
+                // Connect to this builder
+                builder.withCredentials(new AWSStaticCredentialsProvider(credentials));
+            }
             if (isNotBlank(settings.s3Profile)) {
                 System.out.println("Using AWS profile=" + settings.s3Profile);
                 builder.withCredentials(new ProfileCredentialsProvider(settings.s3Profile));

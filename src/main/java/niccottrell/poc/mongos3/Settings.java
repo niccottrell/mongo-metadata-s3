@@ -13,6 +13,7 @@ public class Settings {
     protected final String s3Profile;
     protected final String s3Prefix;
     protected final int s3Threads;
+    public String awsRoleArn;
     protected final String mongoUri;
     protected final String databaseName;
     protected final String collectionName;
@@ -37,6 +38,7 @@ public class Settings {
         cliopt.addOption("p", "s3profile", true, "S3 profile to use");
         cliopt.addOption(null, "s3prefix", true, "S3 prefix path (optional, e.g. `first_test/` or ``)");
         cliopt.addOption(null, "s3threads", true, "The max number of parallel S3 putObject threads, default 100");
+        cliopt.addOption(null, "awsRoleArn", true, "AWS role to assume (optional, e.g. `arn:aws:iam::1234567890:role/TeamABCMember`)");
         cliopt.addOption("c", "uri", true, "MongoDB connection details (default 'mongodb://localhost:27017' )");
         cliopt.addOption("n", "namespace", true, "MongoDB namespace (default: `test.s3mongo`)");
         cliopt.addOption("d", "cleanup", false, "Drop collection and S3 data at start of run");
@@ -71,6 +73,9 @@ public class Settings {
 
         s3Threads = Integer.parseInt(cmd.getOptionValue("s3threads", "100"));
         System.out.println("S3 putter thread pool: " + s3Threads);
+
+        awsRoleArn = StringUtils.trim(cmd.getOptionValue("awsRoleArn", null));
+        if (isNotBlank(awsRoleArn)) System.out.println("AWS role to assume: " + awsRoleArn);
 
         skipGzip = cmd.hasOption("skipGzip");
         if (skipGzip) System.out.println("Skipping GZIP before put");
