@@ -30,28 +30,41 @@ public class Putter extends Worker {
         while (keepGoing()) {
             // load some small number of documents to process
             Iterable<Document> docs = demo.findNew(lastRun)
-                    .sort(new Document("_id", 1)) // assuming ObjectId take then in insert order
+                    .sort(new Document("_id", 1)) // assuming ObjectId take the in insert order
                     .limit(batchSize);
             // spool threads
             Collection<Future<Integer>> futures = new ArrayList<>();
+            Collection<Document> buffer = new ArrayList<>();
+            int sent = 0;
             for (Document doc : docs) {
-                futures.add(demo.s3Pool.submit(new PutRunner(demo, doc)));
+                // put in 10 documents per thread
+                buffer.add(doc);
+                if (buffer.size() >= 10) {
+                    futures.add(demo.s3Pool.submit(new PutRunner(demo, buffer)));
+                    buffer = new ArrayList<>();
+                }
                 lastRun = doc.getObjectId("_id").getDate();
+                sent++;
             }
-            // System.out.format("Submitted %d put runners up to %s\n", futures.size(), lastRun);
+            // anything remaining
+            if (buffer.size() > 0)
+                futures.add(demo.s3Pool.submit(new PutRunner(demo, buffer)));
+            // System.out.format("Submitted %d put runners up to %s\n", sent, lastRun);
             // collect results
-            int count = 0;
+            int total = 0;
             for (Future<Integer> future : futures) {
                 try {
-                    count += future.get();
+                    Integer count = future.get();
+                    incOps(Results.Op.PUTS, count);
+                    total += count;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             // if (count > 0) System.out.format("Just put %,d S3 objects\n", count);
-            incOps(Results.Op.PUTS, count);
-            if (count == 0) {
+            if (total == 0) {
                 // there was nothing to do
+                System.out.println("Ran out of documents not in S3, sleeping");
                 sleep(1000);
             } else {
                 sleep();
